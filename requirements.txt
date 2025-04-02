@@ -1,0 +1,9 @@
+flask
+opencv-python
+numpy
+kafka-python
+pyspark[sql,streaming,kafka]
+face-recognition
+cassandra-driver
+libevdev
+cffi

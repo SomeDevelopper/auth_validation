@@ -1,0 +1,2 @@
+commande pour installer les dépendences :
+pip install --only-binary=numpy numpy --only-binary :all: cassandra-driver -r requirements.txt

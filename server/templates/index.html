@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surveillance Faciale</title>
+</head>
+<body>
+    <h2>Surveillance en Direct</h2>
+    <video id="video" autoplay></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <p id="status">📡 Surveillance en cours...</p>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const statusText = document.getElementById('status');
+
+        // Accéder à la caméra du téléphone
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => video.srcObject = stream)
+            .catch(err => console.error("Erreur d'accès à la caméra :", err));
+
+        function captureAndSend() {
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append("image", blob, "capture.jpg");
+
+                fetch("/upload", {
+                    method: "POST",
+                    body: formData
+                }).then(response => response.json())
+                  .then(data => {
+                      statusText.innerText = "📸 " + data.result;
+                  })
+                  .catch(err => console.error("Erreur d'envoi :", err));
+            }, "image/jpeg");
+
+            setTimeout(captureAndSend, 5000); // Capture toutes les 5 secondes
+        }
+
+        setTimeout(captureAndSend, 5000); // Démarre après 5 secondes
+    </script>
+</body>
+</html>
