@@ -1,8 +1,8 @@
 from flask import Flask, render_template, jsonify, request
-#import cv2, os
+import cv2, os
 import numpy as np, os, sys
-#from utils.get_data_faces import get_data_storage, extract_features
-#from utils.compare_faces import compare_faces
+from utils.get_data_faces import get_data_storage, extract_features
+from utils.compare_faces import compare_faces
 from utils.MongodbHelper import MongodbHelper
 
 def func(*args, **kwargs): return
