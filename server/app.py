@@ -1,3 +1,4 @@
+import base64
 from flask import Flask, render_template, jsonify, request
 import cv2
 import numpy as np
@@ -21,6 +22,11 @@ def register():
     firstname = request.form.get('prenom').lower()
     npimg = np.frombuffer(file, np.uint8)
     img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+    
+    _, buffer = cv2.imencode('.jpg', img)
+    img_bytes = buffer.tobytes()
+    img = base64.b64encode(img_bytes).decode('utf-8')
+        
     res = insert_picture(lastname,firstname,img)
     return res
     
