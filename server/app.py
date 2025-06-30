@@ -1,8 +1,14 @@
+import base64
 from flask import Flask, render_template, jsonify, request
 import cv2, os
 import numpy as np, os, sys
 from utils.get_data_faces import get_data_storage, extract_features
 from utils.compare_faces import compare_faces
+
+from dynamo_db import insert_picture
+
+app = Flask(__name__)
+
 from utils.MongodbHelper import MongodbHelper
 
 def func(*args, **kwargs): return
@@ -13,6 +19,7 @@ compare_faces = func
 app = Flask(__name__)
 session = {'authenticated': True}  # simule l'authentification
 
+
 @app.route(f'/')
 def index():
     return render_template('index.html')
@@ -21,9 +28,23 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
-@app.route(f'/register')
+
+@app.route(f'/register', methods=['POST'])
 def register():
-    pass
+    file = request.files['image'].read()
+    lastname = request.form.get('nom').lower()
+    firstname = request.form.get('prenom').lower()
+    npimg = np.frombuffer(file, np.uint8)
+    img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+    
+    _, buffer = cv2.imencode('.jpg', img)
+    img_bytes = buffer.tobytes()
+    img = base64.b64encode(img_bytes).decode('utf-8')
+        
+    res = insert_picture(lastname,firstname,img)
+    return res
+    
+    
 
 @app.route(f'/login', methods=['POST'])
 def login():
