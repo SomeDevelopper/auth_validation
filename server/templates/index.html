@@ -3,23 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surveillance Faciale</title>
+    <title>Connexion Faciale</title>
+    <style>
+        #videoSection {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h2>Surveillance en Direct</h2>
-    <video id="video" autoplay></video>
-    <canvas id="canvas" style="display:none;"></canvas>
-    <p id="status">📡 Surveillance en cours...</p>
+    <h2>Connexion par Reconnaissance Faciale</h2>
+
+    <form id="loginForm">
+        <label for="nom">Nom :</label>
+        <input type="text" id="nom" name="nom" required><br><br>
+
+        <label for="prenom">Prénom :</label>
+        <input type="text" id="prenom" name="prenom" required><br><br>
+
+        <button type="submit">Démarrer la détection</button>
+    </form>
+
+    <div id="videoSection">
+        <h3>🔍 Analyse faciale en cours...</h3>
+        <video id="video" autoplay></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <p id="status">📡 Surveillance en cours...</p>
+    </div>
 
     <script>
+        const loginForm = document.getElementById('loginForm');
+        const videoSection = document.getElementById('videoSection');
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const statusText = document.getElementById('status');
 
-        // Accéder à la caméra du téléphone
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => video.srcObject = stream)
-            .catch(err => console.error("Erreur d'accès à la caméra :", err));
+        let nom = "";
+        let prenom = "";
+
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            nom = document.getElementById('nom').value;
+            prenom = document.getElementById('prenom').value;
+
+            videoSection.style.display = 'block';
+            loginForm.style.display = 'none';
+
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    setTimeout(captureAndSend, 3000); // Commencer après 3s
+                })
+                .catch(err => {
+                    console.error("Erreur d'accès à la caméra :", err);
+                    statusText.innerText = "🚫 Impossible d'accéder à la caméra.";
+                });
+        });
 
         function captureAndSend() {
             const ctx = canvas.getContext('2d');
@@ -30,21 +68,38 @@
             canvas.toBlob(blob => {
                 const formData = new FormData();
                 formData.append("image", blob, "capture.jpg");
+                formData.append("nom", nom);
+                formData.append("prenom", prenom);
 
-                fetch("/upload", {
+                fetch("/login", {
                     method: "POST",
                     body: formData
-                }).then(response => response.json())
-                  .then(data => {
-                      statusText.innerText = "📸 " + data.result;
-                  })
-                  .catch(err => console.error("Erreur d'envoi :", err));
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Réponse réseau incorrecte");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    statusText.innerText = data.result;
+
+                    if (data.authorized) {
+                        statusText.innerText = "✅ " + data.result;
+                        setTimeout(() => {
+                            window.location.href = "dashboard"; // page fictive
+                        }, 1500);
+                    } else {
+                        statusText.innerText = "❌ " + data.result;
+                        setTimeout(captureAndSend, 5000); // réessaie après 5s
+                    }
+                })
+                .catch(err => {
+                    console.error("Erreur d'envoi :", err);
+                    statusText.innerText = "❌ Erreur lors de l'envoi de l'image.";
+                });
             }, "image/jpeg");
-
-            setTimeout(captureAndSend, 5000); // Capture toutes les 5 secondes
         }
-
-        setTimeout(captureAndSend, 5000); // Démarre après 5 secondes
     </script>
 </body>
 </html>
