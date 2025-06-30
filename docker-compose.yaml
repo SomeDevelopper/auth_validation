@@ -1,0 +1,11 @@
+mongo:
+    container_name: mongo
+    image: mongo:5.0
+    ports:
+        - 27017:27017
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: ynovdb
+        MONGO_INITDB_ROOT_PASSWORD: passdb*2025#
+    volumes:
+        - ./storage:/data/db
+    restart: always
