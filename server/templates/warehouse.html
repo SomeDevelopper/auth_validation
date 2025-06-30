@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Warehouse Actions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .dashboard {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 350px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        form {
+            margin: 1.5rem 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+        input[type="text"] {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 85%;
+            margin-right: 1rem; /* Plus d'espacement */
+            min-width: 250px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 0.5rem 1.2rem;
+            font-size: 1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #217dbb;
+        }
+        .logout-btn {
+            margin-top: 2rem;
+            background-color: #e74c3c;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>Warehouse</h1>
+        <form id="add-document-form">
+            <input type="text" name="document" placeholder="Ajouter un nouveau document" required>
+            <button type="submit">Add New Document</button>
+        </form>
+        <form id="find-similar-form">
+            <input type="text" name="query" placeholder="Rechercher des documents similaires" required>
+            <button type="submit">Find Similar</button>
+        </form>
+        <button class="logout-btn" onclick="window.location.href='/'">Se déconnecter</button>
+        <script>
+            document.getElementById('add-document-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const documentValue = this.elements['document'].value;
+                await fetch('/warehouse/add_document', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content: documentValue })
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        response.json().then(data => {
+                            alert('Erreur lors de l\'ajout du document: ' + JSON.stringify(data));
+                        });
+                    }
+                });
+            });
+
+            document.getElementById('find-similar-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const queryValue = this.elements['query'].value;
+                await fetch('/warehouse/find_similar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ input_text: queryValue })
+                }).then(response => {
+                    if (response.ok) {
+                        response.json().then(data => {
+                            if (Array.isArray(data.results) && data.results.length > 0) {
+                                const listItems = data.results.map(item => `<li>${item}</li>`).join('');
+                                alert('Résultats:\n\n' + data.results.map(item => `• ${item}`).join('\n'));
+                                // Optionally, you could display in the DOM instead of alert
+                                // document.body.insertAdjacentHTML('beforeend', `<ul>${listItems}</ul>`);
+                            } else {
+                                alert('Aucun résultat trouvé.');
+                            }
+                        });
+                    } else {
+                        response.json().then(data => {
+                            alert('Erreur lors de la recherche: ' + JSON.stringify(data));
+                        });
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
