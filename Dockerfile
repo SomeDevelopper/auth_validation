@@ -1,22 +1,19 @@
-FROM python:3.12-slim
+FROM python:3.12
 
 WORKDIR /work
-
-RUN apt-get update && apt-get install -y \
-    cmake \
-    build-essential \
-    libgl1 \
-    libboost-all-dev \
-    libssl-dev \
-    libffi-dev \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /work/requirements.txt
 COPY server /work/Client
 
-EXPOSE 5005
+EXPOSE 8080
 
-RUN pip install --no-cache-dir -r requirements.txt && rm -rf /root/.cache/pip
+RUN apt-get update && apt-get install -y \
+    cmake \
+    libgl1 \
+    && rm -rf /var/lib/apt/lists/*
 
-CMD ['python', 'server/app.py']
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /root/.cache/pip
+
+CMD ["python", "Client/app.py"]
