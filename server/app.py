@@ -76,7 +76,7 @@ def add_document():
         return jsonify({'error': 'Content is required'}), 400
 
     mongodb_helper = MongodbHelper(
-        uri=os.getenv("MONGO_URI", ""),
+        uri="",
         db_name="test_db",
         collection_name="collection_test",
         text_field="content"
@@ -100,7 +100,7 @@ def find_similar():
         return jsonify({'error': 'input_text field is required'}), 400
 
     mongodb_helper = MongodbHelper(
-        uri=os.getenv("MONGO_URI", ""),
+        uri="",
         db_name="test_db",
         collection_name="collection_test",
         text_field="content"

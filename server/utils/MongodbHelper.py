@@ -7,6 +7,7 @@ dotenv.load_dotenv()
 
 class MongodbHelper:
     def __init__(self, uri: str, db_name: str, collection_name: str, text_field: str):
+        uri = "mongodb://ynovdb:passdb*2025#@0.0.0.0:27017"
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
         self.collection = self.db[collection_name]
