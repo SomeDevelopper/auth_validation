@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from utils.get_data_faces import get_data_storage, extract_features
 from utils.compare_faces import compare_faces
+from .neurolink_detection import 
 
 app = Flask(__name__)
 
