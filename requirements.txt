@@ -3,3 +3,5 @@ opencv-python
 numpy
 face-recognition
 cassandra-driver
+boto3
+csv

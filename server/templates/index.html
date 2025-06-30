@@ -20,7 +20,9 @@
         <label for="prenom">Prénom :</label>
         <input type="text" id="prenom" name="prenom" required><br><br>
 
-        <button type="submit">Démarrer la détection</button>
+        <button type="submit" name="action" value="search">Démarrer la détection</button>
+        <br><br>
+        <button type="submit" name="action" value="add">Créer un compte</button>
     </form>
 
     <div id="videoSection">
@@ -36,11 +38,13 @@
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const statusText = document.getElementById('status');
-
+        
+        let currentMode = ""
         let nom = "";
         let prenom = "";
 
         loginForm.addEventListener('submit', function (e) {
+            currentMode = e.submitter.value;
             e.preventDefault();
             nom = document.getElementById('nom').value;
             prenom = document.getElementById('prenom').value;
@@ -71,7 +75,7 @@
                 formData.append("nom", nom);
                 formData.append("prenom", prenom);
 
-                fetch("/login", {
+                fetch(currentMode == "search" ? "/login" : "register", {
                     method: "POST",
                     body: formData
                 })

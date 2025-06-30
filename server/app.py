@@ -3,9 +3,9 @@ import cv2
 import numpy as np
 from utils.get_data_faces import get_data_storage, extract_features
 from utils.compare_faces import compare_faces
+from dynamo_db import insert_picture
 
 app = Flask(__name__)
-
 @app.route(f'/')
 def index():
     return render_template('index.html')
@@ -14,9 +14,17 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
-@app.route(f'register')
+@app.route(f'/register', methods=['POST'])
 def register():
-    pass
+    file = request.files['image'].read()
+    lastname = request.form.get('nom').lower()
+    firstname = request.form.get('prenom').lower()
+    npimg = np.frombuffer(file, np.uint8)
+    img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+    res = insert_picture(lastname,firstname,img)
+    return res
+    
+    
 
 @app.route(f'/login', methods=['POST'])
 def login():
